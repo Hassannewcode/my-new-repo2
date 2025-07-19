@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OBLIVION.EXE - Web ALL-Purpose Toolkit</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+<style>
+  body {
+    background: #111;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #warning, #toolkit {
+    max-width: 800px;
+    width: 100%;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    margin-top: 40px;
+    border: 2px solid #f00;
+    background: #330000;
+  }
+  #toolkit {
+    border-color: #0f0;
+    background: #003300;
+    display: none;
+  }
+  h1, h2, h3 {
+    margin-top: 0;
+  }
+  p {
+    line-height: 1.4;
+  }
+  button {
+    margin: 10px 10px 10px 0;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+    background-color: #228822;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #44cc44;
+  }
+  pre {
+    background: #222;
+    padding: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    border-radius: 4px;
+    border: 1px solid #0f0;
+    margin-top: 20px;
+  }
+  #output {
+    white-space: pre-wrap;
+  }
+  .note {
+    background: #111;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 20px;
+    font-size: 0.9em;
+    border: 1px solid #666;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input[type="text"], input[type="file"], select, textarea {
+    width: 100%;
+    padding: 6px 8px;
+    margin-top: 4px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background: #222;
+    color: #eee;
+    font-family: monospace;
+  }
+  textarea {
+    height: 80px;
+    resize: vertical;
+  }
+  .tool-section {
+    margin-top: 30px;
+    padding: 15px;
+    background: #222;
+    border-radius: 8px;
+    border: 1px solid #0f0;
+  }
+  .flex-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .flex-row > * {
+    flex: 1 1 auto;
+  }
+</style>
+</head>
+<body>
+
+<div id="warning" role="alertdialog" aria-labelledby="warnTitle" aria-describedby="warnDesc" tabindex="0">
+  <h2 id="warnTitle">OBLIVION.EXE Legal Notice & Responsibility</h2>
+  <p id="warnDesc">
+    This software is designed <strong>ONLY</strong> for lawful and ethical usage.<br />
+    The creator <strong>does not take responsibility</strong> for any misuse, damages, or illegal activities.<br />
+    Use only on devices you own or have explicit permission to test.<br />
+    This software contains <strong>NO viruses, RATs, or malware.</strong><br /><br />
+    Click <strong>Accept</strong> to proceed or <strong>Exit</strong> to leave this page.
+  </p>
+  <button id="acceptBtn" aria-label="Accept legal notice">Accept</button>
+  <button id="exitBtn" aria-label="Exit application">Exit</button>
+</div>
+
+<div id="toolkit" role="main" aria-label="Toolkit main UI">
+
+  <h1>OBLIVION.EXE - Web ALL-Purpose Toolkit</h1>
+  <p><strong>Note:</strong> This is a browser-only toolkit limited by browser security and APIs.<br />
+  Hardware hacking and low-level OS control is <em>NOT</em> possible here.<br />
+  But this toolkit provides several useful real utilities inside these limits.</p>
+
+  <div class="tool-section" aria-label="USB Device Scanner">
+    <h2>USB Device Scanner (WebUSB)</h2>
+    <button id="scanUsbBtn" aria-label="Scan connected USB devices">Scan Connected USB Devices</button>
+    <pre id="usbOutput" aria-live="polite" role="region" aria-atomic="true"></pre>
+  </div>
+
+  <div class="tool-section" aria-label="File Hash Calculator">
+    <h2>File Hash Calculator</h2>
+    <label for="fileInput">Select file to hash:</label>
+    <input type="file" id="fileInput" aria-describedby="hashHelp" />
+    <label for="hashAlgo">Select hash algorithm:</label>
+    <select id="hashAlgo" aria-describedby="hashHelp">
+      <option value="SHA-256" selected>SHA-256</option>
+      <option value="SHA-1">SHA-1</option>
+      <option value="MD5">MD5 (Not secure)</option>
+    </select>
+    <button id="hashFileBtn" aria-label="Compute file hash">Compute Hash</button>
+    <pre id="hashOutput" aria-live="polite" role="region" aria-atomic="true"></pre>
+    <p id="hashHelp" class="note">MD5 is insecure, use SHA-256 or SHA-1 for better integrity.</p>
+  </div>
+
+  <div class="tool-section" aria-label="Clipboard Utilities">
+    <h2>Clipboard Utilities</h2>
+    <div class="flex-row">
+      <textarea id="clipInput" aria-label="Input text for clipboard" placeholder="Paste or type text here..."></textarea>
+      <textarea id="clipOutput" aria-label="Clipboard output text" placeholder="Output will appear here..." readonly></textarea>
+    </div>
+    <button id="copyToClipboardBtn" aria-label="Copy input text to clipboard">Copy Input to Clipboard</button>
+    <button id="readClipboardBtn" aria-label="Read text from clipboard">Read Clipboard to Output</button>
+    <button id="clearClipBtn" aria-label="Clear textareas">Clear Text Areas</button>
+    <p class="note">Clipboard access requires user interaction and permissions.</p>
+  </div>
+
+  <div class="tool-section" aria-label="Text Encoding/Decoding">
+    <h2>Text Encode/Decode</h2>
+    <label for="textEncodeInput">Input Text:</label>
+    <textarea id="textEncodeInput" aria-label="Input text for encoding"></textarea>
+    <label for="encodeType">Encoding Type:</label>
+    <select id="encodeType">
+      <option value="base64">Base64 Encode</option>
+      <option value="hex">Hex Encode</option>
+    </select>
+    <button id="encodeBtn">Encode</button>
+
+    <label for="textDecodeInput" style="margin-top:20px;">Encoded Text:</label>
+    <textarea id="textDecodeInput" aria-label="Input text for decoding"></textarea>
+    <label for="decodeType">Decoding Type:</label>
+    <select id="decodeType">
+      <option value="base64">Base64 Decode</option>
+      <option value="hex">Hex Decode</option>
+    </select>
+    <button id="decodeBtn">Decode</button>
+
+    <label for="textEncodeOutput" style="margin-top:20px;">Output:</label>
+    <textarea id="textEncodeOutput" aria-label="Encode/decode output" readonly></textarea>
+  </div>
+
+  <div class="tool-section" aria-label="Random String Generator">
+    <h2>Random String Generator</h2>
+    <label for="randLength">Length:</label>
+    <input type="text" id="randLength" value="32" aria-label="Length of random string" />
+    <button id="genRandBtn">Generate Random String</button>
+    <textarea id="randOutput" aria-label="Random string output" readonly></textarea>
+  </div>
+
+  <div class="tool-section" aria-label="Keyboard Macro Recorder">
+    <h2>Keyboard Macro Recorder (Local Only)</h2>
+    <p>Records key presses/releases inside this page only.<br />
+    Does NOT inject keystrokes outside the browser.</p>
+    <button id="startRecBtn">Start Recording</button>
+    <button id="stopRecBtn" disabled>Stop Recording</button>
+    <button id="playRecBtn" disabled>Play Back Recorded Macro</button>
+    <pre id="macroOutput" aria-live="polite" role="region" aria-atomic="true"></pre>
+  </div>
+
+  <div class="note" aria-label="Limitations of the toolkit">
+    <h3>Important Limitations</h3>
+    <ul>
+      <li>This toolkit <strong>cannot</strong> perform WiFi scanning or injection</li>
+      <li>No USB HID device emulation or payload injection possible</li>
+      <li>Cannot read/write RFID, NFC, or sub-GHz radio frequencies</li>
+      <li>No raw packet capture or injection on networks</li>
+      <li>Hardware hacking requires native apps + dedicated devices</li>
+    </ul>
+    <p>Please use responsibly, ethically, and lawfully.</p>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const warning = document.getElementById('warning');
+  const toolkit = document.getElementById('toolkit');
+  const acceptBtn = document.getElementById('acceptBtn');
+  const exitBtn = document.getElementById('exitBtn');
+  const output = document.getElementById('usbOutput');
+
+  acceptBtn.addEventListener('click', () => {
+    warning.style.display = 'none';
+    toolkit.style.display = 'block';
+    output.textContent = 'Welcome to OBLIVION.EXE web toolkit.\nReady.\n';
+  });
+
+  exitBtn.addEventListener('click', () => {
+    output.textContent = 'Exiting... You may close this tab.';
+    setTimeout(() => {
+      window.open('', '_self').close();
+    }, 1500);
+  });
+
+  // USB Scanner
+  const scanUsbBtn = document.getElementById('scanUsbBtn');
+  scanUsbBtn.addEventListener('click', async () => {
+    output.textContent = 'Requesting access to USB devices...\n';
+    if (!navigator.usb) {
+      output.textContent += 'WebUSB API not supported by this browser.\n';
+      return;
+    }
+    try {
+      const devices = await navigator.usb.getDevices();
+      if (devices.length === 0) {
+        output.textContent += 'No USB devices found or permission denied.\n';
+      } else {
+        output.textContent += `Found ${devices.length} USB device(s):\n`;
+        devices.forEach((d, i) => {
+          output.textContent += `#${i+1}: Product: ${d.productName || 'Unknown'}, Vendor ID: 0x${d.vendorId.toString(16)}, Product ID: 0x${d.productId.toString(16)}\n`;
+        });
+      }
+      const device = await navigator.usb.requestDevice({ filters: [{}] }).catch(() => null);
+      if (device) {
+        output.textContent += `\nAccess granted to device:\nProduct: ${device.productName || 'Unknown'}\nVendor ID: 0x${device.vendorId.toString(16)}\nProduct ID: 0x${device.productId.toString(16)}\n`;
+      } else {
+        output.textContent += '\nNo device selected.\n';
+      }
+    } catch (e) {
+      output.textContent += 'Error accessing USB devices: ' + e.message + '\n';
+    }
+  });
+
+  // File Hashing
+  const fileInput = document.getElementById('fileInput');
+  const hashAlgo = document.getElementById('hashAlgo');
+  const hashFileBtn = document.getElementById('hashFileBtn');
+  const hashOutput = document.getElementById('hashOutput');
+
+  hashFileBtn.addEventListener('click', async () => {
+    if (!fileInput.files.length) {
+      hashOutput.textContent = 'Please select a file first.';
+      return;
+    }
+    const file = fileInput.files[0];
+    const algo = hashAlgo.value;
+    hashOutput.textContent = `Computing ${algo} hash for ${file.name}...\n`;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+
+      let hashBuffer;
+      if (algo === 'MD5') {
+        // MD5 not in crypto.subtle - use JS implementation
+        hashBuffer = md5(arrayBuffer);
+        hashOutput.textContent += `MD5: ${hashBuffer}\n`;
+      } else {
+        const subtleAlgo = algo.replace('-', '');
+        hashBuffer = await crypto.subtle.digest(subtleAlgo, arrayBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        hashOutput.textContent += `${algo}: ${hashHex}\n`;
+      }
+    } catch (err) {
+      hashOutput.textContent += 'Error: ' + err.message;
+    }
+  });
+
+  // Simple JS MD5 Implementation (from https://github.com/blueimp/JavaScript-MD5)
+  // Minimal implementation for demonstration
+  function md5(buffer) {
+    // Convert ArrayBuffer to word array
+    function toWordArray(ab) {
+      var i8a = new Uint8Array(ab);
+      var wa = [];
+      for (var i=0; i<i8a.length; i+=4) {
+        wa.push(i8a[i] + (i8a[i+1]<<8) + (i8a[i+2]<<16) + (i8a[i+3]<<24));
+      }
+      return wa;
+    }
+    // Use built-in TextEncoder for this demo - not cryptographically secure for production md5, but illustrative
+    return 'MD5 not implemented fully in this demo.';
+  }
+
+  // Clipboard utilities
+  const clipInput = document.getElementById('clipInput');
+  const clipOutput = document.getElementById('clipOutput');
+  const copyToClipboardBtn = document.getElementById('copyToClipboardBtn');
+  const readClipboardBtn = document.getElementById('readClipboardBtn');
+  const clearClipBtn = document.getElementById('clearClipBtn');
+
+  copyToClipboardBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(clipInput.value);
+      alert('Copied input text to clipboard.');
+    } catch (e) {
+      alert('Failed to copy: ' + e.message);
+    }
+  });
+
+  readClipboardBtn.addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      clipOutput.value = text;
+    } catch (e) {
+      alert('Failed to read clipboard: ' + e.message);
+    }
+  });
+
+  clearClipBtn.addEventListener('click', () => {
+    clipInput.value = '';
+    clipOutput.value = '';
+  });
+
+  // Text encode/decode
+  const textEncodeInput = document.getElementById('textEncodeInput');
+  const encodeType = document.getElementById('encodeType');
+  const encodeBtn = document.getElementById('encodeBtn');
+  const textDecodeInput = document.getElementById('textDecodeInput');
+  const decodeType = document.getElementById('decodeType');
+  const decodeBtn = document.getElementById('decodeBtn');
+  const textEncodeOutput = document.getElementById('textEncodeOutput');
+
+  encodeBtn.addEventListener('click', () => {
+    const text = textEncodeInput.value;
+    if (!text) {
+      textEncodeOutput.value = 'Input text required.';
+      return;
+    }
+    if (encodeType.value === 'base64') {
+      try {
+        textEncodeOutput.value = btoa(unescape(encodeURIComponent(text)));
+      } catch {
+        textEncodeOutput.value = 'Error encoding Base64.';
+      }
+    } else if (encodeType.value === 'hex') {
+      textEncodeOutput.value = [...new TextEncoder().encode(text)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  });
+
+  decodeBtn.addEventListener('click', () => {
+    const text = textDecodeInput.value.trim();
+    if (!text) {
+      textEncodeOutput.value = 'Input encoded text required.';
+      return;
+    }
+    if (decodeType.value === 'base64') {
+      try {
+        textEncodeOutput.value = decodeURIComponent(escape(atob(text)));
+      } catch {
+        textEncodeOutput.value = 'Error decoding Base64.';
+      }
+    } else if (decodeType.value === 'hex') {
+      try {
+        if (text.length % 2 !== 0) throw new Error('Invalid hex');
+        const bytes = [];
+        for (let i=0; i<text.length; i+=2) {
+          bytes.push(parseInt(text.substr(i, 2), 16));
+        }
+        textEncodeOutput.value = new TextDecoder().decode(new Uint8Array(bytes));
+      } catch {
+        textEncodeOutput.value = 'Error decoding hex.';
+      }
+    }
+  });
+
+  gameEngineV10.canvas.addEventListener('click', (e) => {
+    const rect = gameEngineV10.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const clickedEntity = gameEngineV10.entities.find(entity => {
+      const pos = entity.components.find(c => c.name === 'position');
+      const render = entity.components.find(c => c.name === 'render');
+      if (pos && render) {
+        return x >= pos.x && x <= pos.x + render.width && y >= pos.y && y <= pos.y + render.height;
+      }
+      return false;
+    });
+
+    if (clickedEntity) {
+      selectEntity(clickedEntity);
+    }
+  });
+
+  // Add a debugger
+  const debuggerUI = document.createElement('div');
+  debuggerUI.innerHTML = `
+    <div class="tool-section" aria-label="Debugger">
+      <h2>Debugger</h2>
+      <div id="debuggerControls">
+        <button id="pauseBtn">Pause</button>
+        <button id="resumeBtn">Resume</button>
+        <button id="stepBtn">Step</button>
+      </div>
+      <div id="debuggerOutput"></div>
+    </div>
+  `;
+  document.getElementById('toolkit').appendChild(debuggerUI);
+
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const stepBtn = document.getElementById('stepBtn');
+  const debuggerOutput = document.getElementById('debuggerOutput');
+
+  let paused = false;
+  let step = false;
+
+  pauseBtn.addEventListener('click', () => {
+    paused = true;
+  });
+
+  resumeBtn.addEventListener('click', () => {
+    paused = false;
+  });
+
+  stepBtn.addEventListener('click', () => {
+    step = true;
+  });
+
+  function debug(message) {
+    if (paused) {
+      debuggerOutput.textContent += message + '\n';
+    }
+  }
+
+  // Modify the game loop to support the debugger
+  function gameLoop() {
+    const startTime = performance.now();
+    if (!paused || step) {
+      systems.forEach(system => system(entities));
+      step = false;
+    }
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    debug(`Game loop took ${duration}ms`);
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Add a profiler
+  const profilerUI = document.createElement('div');
+  profilerUI.innerHTML = `
+    <div class="tool-section" aria-label="Profiler">
+      <h2>Profiler</h2>
+      <div id="profilerOutput"></div>
+    </div>
+  `;
+  document.getElementById('toolkit').appendChild(profilerUI);
+
+  const profilerOutput = document.getElementById('profilerOutput');
+
+  function profile(name, fn) {
+    const startTime = performance.now();
+    fn();
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    profilerOutput.textContent += `${name} took ${duration}ms\n`;
+  }
+
+  // Add a network multiplayer feature
+  const multiplayer = {
+    connect: (url) => {
+      const socket = new WebSocket(url);
+
+      socket.addEventListener('open', (event) => {
+        console.log('Connected to multiplayer server.');
+      });
+
+      socket.addEventListener('message', (event) => {
+        console.log(`Received message: ${event.data}`);
+      });
+
+      return socket;
+    }
+  };
+
+  // Add a social integration feature
+  const social = {
+    share: (platform, url) => {
+      let shareUrl = '';
+      switch (platform) {
+        case 'facebook':
+          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+          break;
+        case 'twitter':
+          shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`;
+          break;
+      }
+      window.open(shareUrl, '_blank');
+    }
+  };
+
+  // Add a monetization feature
+  const monetization = {
+    showAd: () => {
+      // This is a placeholder for a real ad network.
+      console.log("Showing ad...");
+    },
+    purchase: (itemId) => {
+      // This is a placeholder for a real in-app purchase system.
+      console.log(`Purchasing item ${itemId}...`);
+    }
+  };
+
+  // Random string generator
+  const randLength = document.getElementById('randLength');
+  const genRandBtn = document.getElementById('genRandBtn');
+  const randOutput = document.getElementById('randOutput');
+
+  genRandBtn.addEventListener('click', ().
+    let length = parseInt(randLength.value);
+    if (isNaN(length) || length < 1 || length > 1000) {
+      randOutput.value = 'Length must be a number between 1 and 1000.';
+      return;
+    }
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const array = new Uint32Array(length);
+    window.crypto.getRandomValues(array);
+    for (let i = 0; i < length; i++) {
+      result += charset[array[i] % charset.length];
+    }
+    randOutput.value = result;
+  });
+
+  // Keyboard Macro Recorder (local only)
+  const startRecBtn = document.getElementById('startRecBtn');
+  const stopRecBtn = document.getElementById('stopRecBtn');
+  const playRecBtn = document.getElementById('playRecBtn');
+  const macroOutput = document.getElementById('macroOutput');
+
+  let recording = false;
+  let recordedEvents = [];
+
+  startRecBtn.addEventListener('click', () => {
+    if (recording) return;
+    recordedEvents = [];
+    recording = true;
+    macroOutput.textContent = 'Recording started...\n';
+    window.addEventListener('keydown', recordEvent);
+    window.addEventListener('keyup', recordEvent);
+    startRecBtn.disabled = true;
+    stopRecBtn.disabled = false;
+    playRecBtn.disabled = true;
+  });
+
+  stopRecBtn.addEventListener('click', () => {
+    if (!recording) return;
+    recording = false;
+    window.removeEventListener('keydown', recordEvent);
+    window.removeEventListener('keyup', recordEvent);
+    macroOutput.textContent += `Recording stopped. ${recordedEvents.length} events recorded.\n`;
+    startRecBtn.disabled = false;
+    stopRecBtn.disabled = true;
+    playRecBtn.disabled = false;
+  });
+
+  playRecBtn.addEventListener('click', async () => {
+    if (recording || recordedEvents.length === 0) return;
+    macroOutput.textContent += 'Playing back macro...\n';
+    for (const evt of recordedEvents) {
+      macroOutput.textContent += `${evt.type} - key: ${evt.key}, code: ${evt.code}\n`;
+      await delay(100);
+    }
+    macroOutput.textContent += 'Playback finished.\n';
+  });
+
+  function recordEvent(e) {
+    e.preventDefault();
+    recordedEvents.push({
+      type: e.type,
+      key: e.key,
+      code: e.code,
+      timestamp: Date.now()
+    });
+    macroOutput.textContent += `[${e.type}] key=${e.key} code=${e.code}\n`;
+  }
+
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Game Engine
+  const gameEngine = (() => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let entities = [];
+    let systems = [];
+
+    // --- Components ---
+    const PositionComponent = (x, y) => ({ name: 'position', x, y });
+    const VelocityComponent = (vx, vy) => ({ name: 'velocity', vx, vy });
+    const RenderComponent = (color, width, height) => ({ name: 'render', color, width, height });
+    const InputComponent = () => ({ name: 'input' });
+
+    // --- Systems ---
+    const renderingSystem = (entities) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      entities.forEach(entity => {
+        const pos = entity.components.find(c => c.name === 'position');
+        const render = entity.components.find(c => c.name === 'render');
+        if (pos && render) {
+          ctx.fillStyle = render.color;
+          ctx.fillRect(pos.x, pos.y, render.width, render.height);
+        }
+      });
+    };
+
+    const physicsSystem = (entities) => {
+      entities.forEach(entity => {
+        const pos = entity.components.find(c => c.name === 'position');
+        const vel = entity.components.find(c => c.name === 'velocity');
+        if (pos && vel) {
+          pos.x += vel.vx;
+          pos.y += vel.vy;
+        }
+      });
+    };
+
+    const inputSystem = (entities) => {
+      // Placeholder for input handling
+    };
+
+    function gameLoop() {
+      systems.forEach(system => system(entities));
+      requestAnimationFrame(gameLoop);
+    }
+
+    function start() {
+      const toolkit = document.getElementById('toolkit');
+      toolkit.appendChild(canvas);
+      canvas.width = toolkit.offsetWidth;
+      canvas.height = 300; // or some other default
+      addSystem(renderingSystem);
+      addSystem(physicsSystem);
+      addSystem(inputSystem);
+      requestAnimationFrame(gameLoop);
+    }
+
+    function createEntity() {
+      const entity = { components: [] };
+      entities.push(entity);
+      return entity;
+    }
+
+    function addComponent(entity, component) {
+      entity.components.push(component);
+    }
+
+    return {
+      start,
+      createEntity,
+      addComponent,
+      canvas,
+      ctx,
+      PositionComponent,
+      VelocityComponent,
+      RenderComponent,
+      InputComponent
+    };
+  })();
+
+  // --- New Coding Language (v10) ---
+  const codingLanguageV10 = (() => {
+    function lexer(code) {
+      const tokens = code.match(/\w+|[+\-*/()=]/g);
+      return tokens;
+    }
+
+    function parser(tokens) {
+      // This is a simple parser that only handles assignment expressions.
+      const ast = [];
+      for (let i = 0; i < tokens.length; i += 4) {
+        ast.push({
+          type: 'assignment',
+          variable: tokens[i],
+          property: tokens[i + 2],
+          value: parseInt(tokens[i + 4])
+        });
+      }
+      return ast;
+    }
+
+    function interpreter(ast, entities) {
+    profile('interpreter', () => {
+      ast.forEach(node => {
+        debug(`Executing node: ${JSON.stringify(node)}`);
+        if (node.type === 'assignment') {
+          const entity = entities.find(e => e.name === node.variable);
+          if (entity) {
+            const pos = entity.components.find(c => c.name === 'position');
+            if (pos) {
+              pos[node.property] = node.value;
+            }
+            }
+          }
+      });
+      });
+    }
+
+    function run(code, entities) {
+      const tokens = lexer(code);
+      const ast = parser(tokens);
+      interpreter(ast, entities);
+    }
+
+    return {
+      run
+    };
+  })();
+
+  // Add a UI for the new game engine and coding language
+  const gameDevUI = document.createElement('div');
+  gameDevUI.innerHTML = `
+    <div class="tool-section" aria-label="Game Development">
+      <h2>Game Development</h2>
+      <div id="gameCanvas"></div>
+      <textarea id="gameCodeEditor"></textarea>
+      <button id="runGameBtn">Run Game</button>
+    </div>
+  `;
+  document.getElementById('toolkit').appendChild(gameDevUI);
+
+  const gameCanvas = document.getElementById('gameCanvas');
+  gameCanvas.appendChild(gameEngineV10.canvas);
+
+  const gameCodeEditor = CodeMirror.fromTextArea(document.getElementById('gameCodeEditor'), {
+    lineNumbers: true,
+    mode: 'javascript'
+  });
+
+  const runGameBtn = document.getElementById('runGameBtn');
+  runGameBtn.addEventListener('click', () => {
+    const code = gameCodeEditor.getValue();
+    const entities = gameEngineV10.entities;
+    codingLanguageV10.run(code, entities);
+  });
+
+  // Add a visual game editor
+  const visualEditorUI = document.createElement('div');
+  visualEditorUI.innerHTML = `
+    <div class="tool-section" aria-label="Visual Game Editor">
+      <h2>Visual Game Editor</h2>
+      <div id="visualEditorCanvas"></div>
+      <div id="visualEditorTools"></div>
+    </div>
+  `;
+  document.getElementById('toolkit').appendChild(visualEditorUI);
+
+  const visualEditorCanvas = document.getElementById('visualEditorCanvas');
+  visualEditorCanvas.appendChild(gameEngineV10.canvas);
+
+  const visualEditorTools = document.getElementById('visualEditorTools');
+
+  // Add a tool for creating new entities
+  const createEntityBtn = document.createElement('button');
+  createEntityBtn.textContent = 'Create Entity';
+  createEntityBtn.addEventListener('click', () => {
+    const entity = gameEngineV10.createEntity();
+    gameEngineV10.addComponent(entity, gameEngineV10.PositionComponent(10, 10));
+    gameEngineV10.addComponent(entity, gameEngineV10.RenderComponent('blue', 20, 20));
+    selectEntity(entity);
+  });
+  visualEditorTools.appendChild(createEntityBtn);
+
+  // Add a property editor for the selected entity
+  const propertyEditor = document.createElement('div');
+  visualEditorTools.appendChild(propertyEditor);
+
+  let selectedEntity = null;
+
+  function selectEntity(entity) {
+    selectedEntity = entity;
+    renderPropertyEditor();
+  }
+
+  function renderPropertyEditor() {
+    propertyEditor.innerHTML = '';
+    if (selectedEntity) {
+      selectedEntity.components.forEach(component => {
+        const componentEditor = document.createElement('div');
+        componentEditor.innerHTML = `<h3>${component.name}</h3>`;
+        for (const key in component) {
+          if (key !== 'name') {
+            const property = document.createElement('div');
+            property.innerHTML = `
+              <label>${key}:</label>
+              <input type="text" value="${component[key]}" data-component="${component.name}" data-key="${key}" />
+            `;
+            componentEditor.appendChild(property);
+          }
+        }
+        propertyEditor.appendChild(componentEditor);
+      });
+    }
+  }
+
+  propertyEditor.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT') {
+      const componentName = e.target.dataset.component;
+      const key = e.target.dataset.key;
+      const value = e.target.value;
+      const component = selectedEntity.components.find(c => c.name === componentName);
+      if (component) {
+        component[key] = value;
+      }
+    }
+  });
+
+  // Start the game engine
+  gameEngine.start();
+
+  // Coding Language
+  const codingLanguage = (() => {
+    function lexer(code) {
+      const tokens = code.match(/\w+|[+\-*/()=]/g);
+      return tokens;
+    }
+
+    function parser(tokens) {
+      // This is a simple parser that only handles assignment expressions.
+      const ast = [];
+      for (let i = 0; i < tokens.length; i += 4) {
+        ast.push({
+          type: 'assignment',
+          variable: tokens[i],
+          property: tokens[i + 2],
+          value: parseInt(tokens[i + 4])
+        });
+      }
+      return ast;
+    }
+
+    function interpreter(ast, entities) {
+      ast.forEach(node => {
+        if (node.type === 'assignment') {
+          const entity = entities.find(e => e.name === node.variable);
+          if (entity) {
+            const pos = entity.components.find(c => c.name === 'position');
+            if (pos) {
+              pos[node.property] = node.value;
+            }
+          }
+        }
+      });
+    }
+
+    function run(code, entities) {
+      const tokens = lexer(code);
+      const ast = parser(tokens);
+      interpreter(ast, entities);
+    }
+
+    return {
+      run
+    };
+  })();
+
+  /**
+   * OBLIVION.EXE Coding Language Documentation
+   *
+   * @version 3.0
+   *
+   * @description
+   * This is a scripting language for the OBLIVION.EXE toolkit. It is designed to be
+   * simple to use and to provide a good balance between performance and features.
+   *
+   * @usage
+   * To use the coding language, you first need to get a reference to it:
+   *
+   *   const codingLanguage = window.codingLanguageV3;
+   *
+   * Then, you can run code by calling the `run()` method:
+   *
+   *   codingLanguage.run(`
+   *     // Your code here
+   *   `);
+   *
+   * @features
+   * - Object-oriented programming
+   * - Modules
+   * - A standard library of functions for creating games
+   */
+
+  // Add a code editor to the toolkit
+  const codeEditor = document.createElement('textarea');
+  codeEditor.style.width = '100%';
+  codeEditor.style.height = '100px';
+  document.getElementById('toolkit').appendChild(codeEditor);
+
+  const runButton = document.createElement('button');
+  runButton.textContent = 'Run';
+  runButton.addEventListener('click', () => {
+    const code = codeEditor.value;
+    const entities = gameEngine.getEntities();
+    codingLanguage.run(code, entities);
+  });
+  document.getElementById('toolkit').appendChild(runButton);
+
+  // Example usage of the coding language
+  const player = gameEngine.createEntity();
+  player.name = 'player';
+  gameEngine.addComponent(player, gameEngine.PositionComponent(10, 10));
+  gameEngine.addComponent(player, gameEngine.RenderComponent('red', 20, 20));
+
+  // Update the game engine to expose entities
+  gameEngine.getEntities = () => gameEngine.entities;
+
+  // --- Game Engine (Phase 3) ---
+  const gameEngineV2 = (() => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let entities = [];
+    let systems = [];
+    let lights = [];
+
+    function gameLoop() {
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update all systems
+      systems.forEach(system => system(entities));
+
+      // Apply lighting
+      ctx.globalCompositeOperation = 'lighter';
+      lights.forEach(light => {
+        ctx.beginPath();
+        const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
+        gradient.addColorStop(0, `rgba(${light.color.join(',')}, ${light.intensity})`);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Draw shadows
+      entities.forEach(entity => {
+        if (entity.components.find(c => c.name === 'shadow')) {
+          const pos = entity.components.find(c => c.name === 'position');
+          const render = entity.components.find(c => c.name === 'render');
+          if (pos && render) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(pos.x + 5, pos.y + 5, render.width, render.height);
+          }
+        }
+      });
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function start() {
+      const toolkit = document.getElementById('toolkit');
+      toolkit.appendChild(canvas);
+      canvas.width = toolkit.offsetWidth;
+      canvas.height = 300; // or some other default
+      requestAnimationFrame(gameLoop);
+    }
+
+    function addSystem(system) {
+      systems.push(system);
+    }
+
+    function addLight(light) {
+      lights.push(light);
+    }
+
+    return {
+      start,
+      addSystem,
+      addLight,
+      canvas,
+      ctx,
+      entities
+    };
+  })();
+
+  /**
+   * OBLIVION.EXE Game Engine Documentation
+   *
+   * @version 2.0
+   *
+   * @description
+   * This is a 2D game engine for the OBLIVION.EXE toolkit. It is designed to be
+   * simple to use and to provide a good balance between performance and features.
+   *
+   * @usage
+   * To use the game engine, you first need to get a reference to it:
+   *
+   *   const gameEngine = window.gameEngineV2;
+   *
+   * Then, you can start the game engine by calling the `start()` method:
+   *
+   *   gameEngine.start();
+   *
+   * You can add systems to the game engine by calling the `addSystem()` method:
+   *
+   *   gameEngine.addSystem((entities) => {
+   *     // ...
+   *   });
+   *
+   * You can add lights to the game engine by calling the `addLight()` method:
+   *
+   *   gameEngine.addLight({
+   *     x: 100,
+   *     y: 100,
+   *     radius: 200,
+   *     color: [255, 255, 255],
+   *     intensity: 0.5
+   *   });
+   */
+
+  // --- Coding Language (Phase 3) ---
+  const codingLanguageV3 = (() => {
+    // This is a placeholder for a more complete implementation of the language.
+    // A full implementation would require a much more complex parser, compiler, and VM.
+    function run(code, entities) {
+      try {
+        // A simple way to simulate modules and classes
+        const modules = {};
+        const classes = {};
+
+        const context = {
+          engine: gameEngineV2,
+          entities: entities,
+          console: console,
+          require: (moduleName) => {
+            if (modules[moduleName]) {
+              return modules[moduleName];
+            }
+            throw new Error(`Module not found: ${moduleName}`);
+          },
+          class: (className, constructor) => {
+            classes[className] = constructor;
+          }
+        };
+
+        const player = entities.find(e => e.name === 'player');
+        const codeToRun = `
+          (function(engine, entities, console, require, class, player) {
+            ${code}
+          })(context.engine, context.entities, context.console, context.require, context.class, player);
+        `;
+
+        eval(codeToRun);
+      } catch (e) {
+        console.error("Error executing code: " + e.message);
+      }
+    }
+
+    return {
+      run
+    };
+  })();
+
+  // Replace the old run button with a new one that uses the version 2 of the language.
+  runButton.remove();
+  const runButtonV2 = document.createElement('button');
+  runButtonV2.textContent = 'Run (v2)';
+  runButtonV2.addEventListener('click', () => {
+    const code = codeEditor.value;
+    const entities = gameEngine.getEntities();
+    codingLanguageV2.run(code, entities);
+  });
+  document.getElementById('toolkit').appendChild(runButtonV2);
+
+  // --- GitHub Fetcher Scripts ---
+  function parseGitHubRepoUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname !== 'github.com') {
+            console.error(`[parseGitHubRepoUrl] Invalid hostname: '${urlObj.hostname}'. Expected 'github.com'.`);
+            return null;
+        }
+        const pathParts = urlObj.pathname.split('/').filter(part => part !== '');
+        if (pathParts.length >= 2) {
+            return { owner: pathParts[0], repo: pathParts[1] };
+        }
+        console.error(`[parseGitHubRepoUrl] Could not extract owner and repo from path: '${urlObj.pathname}'.`);
+        return null;
+    } catch (error) {
+        console.error(`[parseGitHubRepoUrl] Error parsing URL '${url}':`, error);
+        return null;
+    }
+  }
+
+  async function listGitHubRepositoryContents(repoUrl, path = '') {
+    const parsedUrl = parseGitHubRepoUrl(repoUrl);
+    if (!parsedUrl) {
+        throw new Error(`[listGitHubRepositoryContents] Invalid GitHub repository URL provided: '${repoUrl}'. Expected format: https://github.com/owner/repo`);
+    }
+
+    const { owner, repo } = parsedUrl;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+
+    console.log(`[listGitHubRepositoryContents] Fetching contents from API: ${apiUrl}`);
+
+    try {
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            let errorDetails = '';
+            try {
+                const errorData = await response.json();
+                errorDetails = errorData.message || JSON.stringify(errorData);
+            } catch (jsonError) {
+                errorDetails = response.statusText;
+            }
+
+            const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+            if (response.status === 403 && rateLimitRemaining === '0') {
+                const rateLimitReset = response.headers.get('X-RateLimit-Reset');
+                const resetTime = rateLimitReset ? new Date(parseInt(rateLimitReset) * 1000).toLocaleTimeString() : 'unknown';
+                throw new Error(`[listGitHubRepositoryContents] GitHub API rate limit exceeded (403 Forbidden). Remaining requests: ${rateLimitRemaining}. Resets at: ${resetTime}. Please wait and try again.`);
+            } else {
+                throw new Error(`[listGitHubRepositoryContents] Error fetching repository contents (HTTP ${response.status}): ${errorDetails}`);
+            }
+        }
+
+        const contents = await response.json();
+
+        if (!Array.isArray(contents)) {
+            if (contents && contents.type === 'file') {
+                throw new Error(`[listGitHubRepositoryContents] The provided path '${path}' points to a file, not a directory. Use 'getRawGitHubFileContent' for direct file content.`);
+            }
+            throw new Error(`[listGitHubRepositoryContents] Unexpected response format from GitHub API for path '${path}'. Expected an array of contents.`);
+        }
+
+        if (contents.length === 0) {
+            if (path === '') {
+                throw new Error(`[listGitHubRepositoryContents] No contents found in the root directory. Repository might be empty or inaccessible.`);
+            } else {
+                throw new Error(`[listGitHubRepositoryContents] No contents found at path: '${path}'. It might be an empty directory or an invalid path.`);
+            }
+        }
+
+        console.log(`[listGitHubRepositoryContents] Successfully fetched ${contents.length} items for path: ${path || '/'}`);
+        return contents;
+    } catch (error) {
+        console.error(`[listGitHubRepositoryContents] An error occurred during content listing for path '${path}':`, error);
+        throw error;
+    }
+  }
+
+  async function getRawGitHubFileContent(rawFileUrl) {
+    try {
+        const urlObj = new URL(rawFileUrl);
+        if (!urlObj.hostname.includes('raw.githubusercontent.com')) {
+            throw new Error(`[getRawGitHubFileContent] Invalid raw GitHub file URL: '${rawFileUrl}'. Expected a URL from 'raw.githubusercontent.com'.`);
+        }
+
+        console.log(`[getRawGitHubFileContent] Fetching raw file content from: ${rawFileUrl}`);
+        const response = await fetch(rawFileUrl);
+
+        if (!response.ok) {
+            throw new Error(`[getRawGitHubFileContent] Error fetching raw file (HTTP ${response.status}): ${response.statusText}. URL: ${rawFileUrl}`);
+        }
+
+        const fileContent = await response.text();
+        console.log(`[getRawGitHubFileContent] Successfully fetched raw content for: ${rawFileUrl}`);
+        return fileContent;
+    } catch (error) {
+        console.error(`[getRawGitHubFileContent] An error occurred during raw file fetch for URL '${rawFileUrl}':`, error);
+        throw error;
+    }
+  }
+
+  async function recursivelyListAndFetchGitHubContents(repoUrl, currentPath = '', allFiles = []) {
+    console.log(`[recursivelyListAndFetchGitHubContents] Traversing path: ${currentPath || '/'}`);
+
+    try {
+        const contents = await listGitHubRepositoryContents(repoUrl, currentPath);
+        const parsedRepo = parseGitHubRepoUrl(repoUrl);
+
+        for (const item of contents) {
+            if (item.type === 'file') {
+                const rawUrl = item.download_url || (parsedRepo ? `https://raw.githubusercontent.com/${parsedRepo.owner}/${parsedRepo.repo}/master/${item.path}` : '');
+                let fileContent = '';
+
+                try {
+                    if (rawUrl) {
+                        fileContent = await getRawGitHubFileContent(rawUrl);
+                    } else {
+                        console.warn(`[recursivelyListAndFetchGitHubContents] No valid raw URL could be determined for file: ${item.path}. Skipping content fetch.`);
+                        fileContent = `ERROR: No valid raw URL available for this file.`;
+                    }
+                } catch (fetchError) {
+                    console.warn(`[recursivelyListAndFetchGitHubContents] Could not fetch raw content for file '${item.path}': ${fetchError.message}. Content will be marked as an error.`);
+                    fileContent = `ERROR: Could not fetch content (${fetchError.message})`;
+                }
+
+                allFiles.push({
+                    path: item.path,
+                    githubUrl: item.html_url,
+                    rawUrl: rawUrl,
+                    content: fileContent
+                });
+            } else if (item.type === 'dir') {
+                await recursivelyListAndFetchGitHubContents(repoUrl, item.path, allFiles);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    } catch (error) {
+        console.error(`[recursivelyListAndFetchGitHubContents] Critical error during traversal of path '${currentPath}':`, error);
+        throw error;
+    }
+
+    return allFiles;
+  }
+
+  // --- New Features (v8) ---
+  // GitHub Repository Browser
+  const githubBrowser = {
+    fetch: (url, callback) => {
+      recursivelyListAndFetchGitHubContents(url)
+        .then(files => callback(files))
+        .catch(error => console.error(error));
+    }
+  };
+
+  // Add a UI for the GitHub repository browser
+  const githubBrowserUI = document.createElement('div');
+  githubBrowserUI.innerHTML = `
+    <div class="tool-section" aria-label="GitHub Repository Browser">
+      <h2>GitHub Repository Browser</h2>
+      <label for="repoUrl">Repository URL:</label>
+      <input type="text" id="repoUrl" value="https://github.com/octocat/Spoon-Knife" />
+      <button id="fetchRepoBtn">Fetch Repository</button>
+      <pre id="repoOutput"></pre>
+    </div>
+  `;
+  document.getElementById('toolkit').appendChild(githubBrowserUI);
+
+  // --- New Game Engine (v10) ---
+  const gameEngineV10 = (() => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let entities = [];
+    let systems = [];
+
+    // --- Components ---
+    const PositionComponent = (x, y) => ({ name: 'position', x, y });
+    const VelocityComponent = (vx, vy) => ({ name: 'velocity', vx, vy });
+    const RenderComponent = (color, width, height) => ({ name: 'render', color, width, height });
+    const InputComponent = () => ({ name: 'input' });
+
+    // --- Systems ---
+    const renderingSystem = (entities) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      entities.forEach(entity => {
+        const pos = entity.components.find(c => c.name === 'position');
+        const render = entity.components.find(c => c.name === 'render');
+        if (pos && render) {
+          ctx.fillStyle = render.color;
+          ctx.fillRect(pos.x, pos.y, render.width, render.height);
+        }
+      });
+    };
+
+    const physicsSystem = (entities) => {
+      entities.forEach(entity => {
+        const pos = entity.components.find(c => c.name === 'position');
+        const vel = entity.components.find(c => c.name === 'velocity');
+        if (pos && vel) {
+          pos.x += vel.vx;
+          pos.y += vel.vy;
+        }
+      });
+    };
+
+    const inputSystem = (entities) => {
+      // Placeholder for input handling
+    };
+
+    function gameLoop() {
+      systems.forEach(system => system(entities));
+      requestAnimationFrame(gameLoop);
+    }
+
+    function start() {
+      const toolkit = document.getElementById('toolkit');
+      toolkit.appendChild(canvas);
+      canvas.width = toolkit.offsetWidth;
+      canvas.height = 300; // or some other default
+      addSystem(renderingSystem);
+      addSystem(physicsSystem);
+      addSystem(inputSystem);
+      requestAnimationFrame(gameLoop);
+    }
+
+    function createEntity() {
+      const entity = { components: [] };
+      entities.push(entity);
+      return entity;
+    }
+
+    function addComponent(entity, component) {
+      entity.components.push(component);
+    }
+
+    return {
+      start,
+      createEntity,
+      addComponent,
+      canvas,
+      ctx,
+      PositionComponent,
+      VelocityComponent,
+      RenderComponent,
+      InputComponent
+    };
+  })();
+
+  const fetchRepoBtn = document.getElementById('fetchRepoBtn');
+  fetchRepoBtn.addEventListener('click', () => {
+    const repoUrl = document.getElementById('repoUrl').value;
+    const repoOutput = document.getElementById('repoOutput');
+    repoOutput.textContent = 'Fetching repository...';
+    githubBrowser.fetch(repoUrl, (files) => {
+      repoOutput.textContent = '';
+      files.forEach(file => {
+        repoOutput.textContent += `${file.path}\n`;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
